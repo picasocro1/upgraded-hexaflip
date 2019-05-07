@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="Keywords">
+  <meta name="author" content="Maciej Kubiak 2019">
+  <link href="upgraded-hexaflip.css" rel="stylesheet" type="text/css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image:
+          radial-gradient(
+              ellipse,
+              #919191,
+              #151515
+          );
+    }
+
+    .datetime {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="datetime"></div>
+
+  <script type="text/javascript" src="upgraded-hexaflip.min.js"></script>
+  <script>
+    var hexaTime, birthdayTime = document.querySelector('.datetime'), orgBirthdayTimeHTML = birthdayTime.innerHTML;
+
+    window.onresize = function() {
+      prepareHexaTime();
+    };
+
+    window.onload = function() {
+      prepareHexaTime();
+    };
+
+    function prepareHexaTime() {
+      birthdayTime.innerHTML = orgBirthdayTimeHTML;
+      hexaTime = new HexaFlip(birthdayTime, null, {
+        size: window.innerWidth * 12 / 100,
+        fontSize: window.innerWidth * 12 / 100 / 1.5,
+        touchSensitivity: 60 / (window.innerWidth * 12 / 100 / 1.5),
+        yearMin: 2015,
+        yearMax: Math.max(2019, new Date().getFullYear())
+        /*⚠️ Warning: only vertical flip is allowed when using years*/
+      });
+
+      addListeners();
+      setDefaultDateTimeValues();
+    }
+
+    /**
+     * Datetime configuration
+     */
+    function setDefaultDateTimeValues() {
+      setTimeout(function() {
+        return hexaTime.setValue({
+          year: '2017',
+          month: '03',
+          day: '21',
+          hour: '14',
+          minute: '03'
+        });
+      }, 0);
+    }
+
+    var listeners = {}, touchStarted = false, setDefaultDataTimeInProgress = false;
+
+    function addListeners() {
+      var cubes = document.querySelectorAll('.hexaflip-cube'), cube;
+      var actions = ['TouchStart', 'MouseDown', /*'TouchMove', 'MouseMove',*/ 'TouchLeave', 'MouseLeave'], action;
+      var mouseLeaveSupport = 'onmouseleave' in window;
+
+      setTimeout(function() {
+        for (var i = 0; i < cubes.length; i++) {
+          cube = cubes[i];
+          for (var j = 0; j < actions.length; j++) {
+            action = actions[j];
+            if (!((action === 'TouchLeave' || action === 'MouseLeave') && !mouseLeaveSupport)) {
+              (function(action) {
+                cube.addEventListener(action.toLowerCase(), function(event) {
+                  return listeners['on' + action](event, this);
+                }, true);
+              }(action));
+            } else {
+              (function(action) {
+                cube.addEventListener('mouseout', function(event) {
+                  return listeners['on' + action](event, this);
+                }, true);
+              }(action));
+            }
+          }
+        }
+      }, 0);
+    }
+
+    listeners.onTouchStart = function(event, cube) {
+      cube.dataset.touchStart = 'true';
+      touchStarted = true;
+    };
+
+    listeners.onMouseDown = function(event, cube) {
+      listeners.onTouchStart(event, cube);
+    };
+
+    listeners.onTouchLeave = function(event, cube) {
+      //For each cube separate
+      /*if (cube.dataset.touchStarted && cube.dataset.touchStarted == 'true') {
+       cube.dataset.touchStarted = 'false';
+
+       setTimeout(function() {
+       setDefaultDateTimeValues();
+       }, 1000);
+       }*/
+
+      //For all cubes together
+      if (touchStarted) {
+        if (!setDefaultDataTimeInProgress) {
+          setDefaultDataTimeInProgress = true;
+          trySetDefaultDataTimeValues();
+        }
+      }
+    };
+
+    var trySetDefaultDataTimeValues = function() {
+      setTimeout(function() {
+        if (!touchStarted) {
+          setDefaultDateTimeValues();
+          setDefaultDataTimeInProgress = false;
+        } else {
+          touchStarted = false;
+          trySetDefaultDataTimeValues();
+        }
+      }, 1000);
+    };
+
+    listeners.onMouseLeave = function(event, cube) {
+      listeners.onTouchLeave(event, cube);
+    };
+  </script>
+</body>
+</html>

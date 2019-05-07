@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css?family=Bungee');
+
+* {
+  box-sizing: border-box;
+  font-family: 'Bungee', cursive;
+  text-transform: uppercase;
+}
+
+.hexaflip-cube {
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  cursor: move;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  cursor: grab;
+  display: inline-block;
+  position: relative;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -o-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.hexaflip-cube:active {
+  cursor: move;
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: grabbing;
+}
+.hexaflip-cube > div {
+  -webkit-transition: -webkit-transform 0.4s;
+  -moz-transition: -moz-transform 0.4s;
+  -o-transition: -o-transform 0.4s;
+  -ms-transition: -ms-transform 0.4s;
+  transition: transform 0.4s;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -o-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.hexaflip-cube > div.no-tween {
+  -webkit-transition-duration: 0s;
+  -moz-transition-duration: 0s;
+  -o-transition-duration: 0s;
+  -ms-transition-duration: 0s;
+  transition-duration: 0s;
+}
+.hexaflip-cube .hexaflip-side {
+  width: 100%;
+  overflow: hidden;
+  height: 100.5%;
+  position: absolute;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  text-align: center;
+  font-weight: 100;
+  line-height: 1.5;
+  background-color: rgba(102, 102, 102, 0.85);
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8), 0 0 6px rgba(255, 255, 255, 0.7), 0 0 9px rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 5px 0 rgba(255, 255, 255, 0.6), 0 0 10px 0 rgba(255, 255, 255, 0.5), 0 0 20px 0 rgba(255, 255, 255, 0.4);
+}
+.hexaflip-side-left,
+.hexaflip-side-right {
+  background-color: rgba(38, 38, 38, 0.85) !important; /*#555*/
+}
+
+.hexaflip-timepicker .hexaflip-cube-year .hexaflip-side:nth-child(5),
+.hexaflip-timepicker .hexaflip-cube-year .hexaflip-side:nth-child(6) {
+  width: 50%;
+}
+
+.hexaflip-timepicker .hexaflip-cube-hour .hexaflip-side,
+.hexaflip-timepicker .hexaflip-cube-minute .hexaflip-side {
+  background-color: rgba(255, 87, 91, 0.85);
+}

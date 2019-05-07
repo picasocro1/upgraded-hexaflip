@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="Keywords">
+  <meta name="author" content="Maciej Kubiak 2019">
+  <link href="upgraded-hexaflip.css" rel="stylesheet" type="text/css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: radial-gradient(
+          ellipse,
+          #ff7b00,
+          #552a00
+      );
+    }
+
+    .lines {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .lines .line {
+      margin: 0 0 2vh 0;
+    }
+
+    .info {
+      position: absolute;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2vmin;
+      color: white;
+      margin: 0 auto;
+      width: 80vw;
+      text-align: center;
+      text-shadow: 0px 0px 5px #000000;
+    }
+
+    .params {
+      position: absolute;
+      width: 95%;
+      left: 50%;
+      top: 2%;
+      transform: translateX(-50%);
+      color: white;
+      text-align: center;
+    }
+
+    .params input, label {
+      margin: 0 1vw;
+    }
+  </style>
+</head>
+<body>
+  <form class="params">
+    <input type="range" id="columns" name="columns" min="5" max="12" step="1" value="9">
+    <label id="lColumns" for="columns">Columns</label>
+    <input type="range" id="rows" name="rows" min="1" max="6" step="1" value="4">
+    <label id="lRows" for="rows">Rows</label>
+    <input type="number" id="duration" name="duration" min="100" max="5000" step="100" value="4000">
+    <label id="lDuration" for="duration">Duration</label>
+    <input type="checkbox" id="wordBreak" checked>
+    <label id="lWordBreak" for="wordBreak">Word-break</label>
+    <label id="lHAlign" for="hAlign">Horizontal text align</label>
+    <select id="hAlign">
+      <option value="left">Left</option>
+      <option value="center" selected>Center</option>
+      <option value="right">Right</option>
+    </select>
+    <label id="lVAlign" for="vAlign">Vertical text align</label>
+    <select id="vAlign">
+      <option value="top selected">Top</option>
+      <option value="center">Center</option>
+      <option value="bottom">Bottom</option>
+    </select>
+    <input id="restart" type="submit" value="Restart 🔄">
+  </form>
+  <div class="lines"></div>
+  <p class="info"></p>
+
+  <script type="text/javascript" src="upgraded-hexaflip-text-slides.js"></script>
+  <!--https://github.com/kriskowal/q-->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/q.js/1.5.1/q.min.js"></script>
+  <script type="text/javascript" src="upgraded-hexaflip.min.js"></script>
+  <script>
+    var columns, rows, duration, wordBreak, hAlign, vAlign, hexaTime, lines = document.querySelector('.lines');
+    var onResizeAction;
+
+    //params
+    var params = document.querySelector('.params');
+    var columnsSlider = document.querySelector('#columns');
+    var columnsLabel = document.querySelector('#lColumns');
+    var rowsSlider = document.querySelector('#rows');
+    var rowsLabel = document.querySelector('#lRows');
+    var durationInput = document.querySelector('#duration');
+    var durationLabel = document.querySelector('#lDuration');
+    var wordBreakInput = document.querySelector('#wordBreak');
+    var hAlignSelect = document.querySelector('#hAlign');
+    var vAlignSelect = document.querySelector('#vAlign');
+
+    columns = columnsSlider.value;
+    columnsLabel.innerHTML = 'Columns (' + Number(columns).toFixed() + ')';
+    rows = rowsSlider.value;
+    rowsLabel.innerHTML = 'Rows (' + Number(rows).toFixed() + ')';
+    duration = durationInput.value;
+    durationLabel.innerHTML = 'Duration (' + (duration / 1000).toFixed(1) + ' s)';
+    wordBreak = wordBreakInput.checked;
+    hAlign = hAlignSelect.value;
+    vAlign = vAlignSelect.value;
+
+    columnsSlider.oninput = function() {
+      columns = this.value;
+      columnsLabel.innerHTML = 'Columns (' + Number(columns).toFixed() + ')';
+    };
+
+    rowsSlider.oninput = function() {
+      rows = this.value;
+      rowsLabel.innerHTML = 'Rows (' + Number(rows).toFixed() + ')';
+    };
+
+    durationInput.oninput = function() {
+      duration = this.value;
+      durationLabel.innerHTML = 'Duration (' + (duration / 1000).toFixed(1) + ' s)';
+    };
+
+    wordBreakInput.oninput = function() {
+      wordBreak = this.checked;
+    };
+
+    hAlignSelect.oninput = function() {
+      hAlign = this.value;
+    };
+
+    vAlignSelect.oninput = function() {
+      vAlign = this.value;
+    };
+
+    params.addEventListener('submit', function(e) {
+      e.preventDefault();
+      prepareHexaTime();
+    });
+
+    function action() {
+      // Haven't resize in 100ms!
+      prepareHexaTime();
+    }
+
+    window.onresize = function() {
+      clearTimeout(onResizeAction);
+      onResizeAction = setTimeout(action, 100);
+    };
+
+    window.onload = function() {
+      prepareHexaTime();
+    };
+
+    function isMobileDevice() {
+      return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    }
+
+    /**
+     * Slides pre-configuration
+     */
+    function prepareHexaTime() {
+      hexaflipTextSlides.generateLines(lines, rows);
+
+      var i, percent = 8, minSize = Math.min(window.innerWidth, window.innerHeight);
+
+      var options = {
+        size: minSize * percent / 100,
+        fontSize: minSize * percent / 100 / 1.5,
+        touchSensitivity: 60 / (minSize * percent / 100 / 1.5),
+        perspective: 800,
+        perspectiveOrigin: '50% 50%',
+        margin: (isMobileDevice() ? 4 : 10)
+      };
+
+      hexaTime = [];
+      var nlLines = lines.querySelectorAll('.line');
+
+      for (i = 0; i < nlLines.length; i++) {
+        hexaTime.push(new HexaFlip(nlLines[i], hexaflipTextSlides.getWordElement(extendedAlphabet, columns, myStyleFn), options));
+        addListeners(nlLines[i]);
+      }
+
+      setDefaultValues();
+    }
+
+    /**
+     * Slides configuration
+     */
+    function setDefaultValues() {
+      var info = document.querySelector('.info');
+      info.style.fontSize = '5vmin';
+      info.innerHTML = '💡';
+      
+      hexaflipTextSlides.setSlides([{
+        text: '💬💬💬'
+      },{
+        text: 'welcome! this is demo of hexaflip textslides.'
+      }, {
+        text: 'the library allows display chosen texts on cubes.'
+      }, {
+        text: 'paragraphs can be grouped into slides with a defined duration and aligns.'
+      }, {
+        text: 'for example this is slide with right horizontal and bottom vertical align and shorter duration time.',
+        options: {
+          textAlign: 'right',
+          textVAlign: 'bottom',
+          duration: duration / 1.5
+        }
+      }, {
+        text: 'that one has different aligns, and longer duration time.',
+        options: {
+          textAlign: 'left',
+          textVAlign: 'top',
+          duration: duration * 1.5
+        }
+      }, {
+        text: 'you can adjust the STYLE of the chosen cubes.',
+        options: {
+          textAlign: 'center'
+        }
+      }, {
+        text: 'feel free to use it as you want! ✔',
+        options: {
+          duration: 300 //time to execute callback after last slide
+        }
+      }], {
+        duration: duration,
+        textAlign: hAlign,
+        textVAlign: vAlign,
+        wordBreaking: wordBreak
+      }, showInfo);
+    }
+
+    function showInfo() {
+      var info = document.querySelector('.info');
+      if (!isMobileDevice()) {
+        info.style.fontSize = '';
+      } else {
+        //info.style.fontSize = '';
+      }
+      info.innerHTML = '💡 Change params if you like 😊<br><span style="font-size: 80%; color: #fffda4">(then press restart or twist any cube, to start animation again!)</span>';
+    }
+
+    function myStyleFn(letterInWordNo, letterOnCubeNo, letter) {
+      var styles = {};
+      if ((letter == 'S') || (letter == 'T') || (letter == 'Y') || (letter == 'L') || (letter == 'E')) {
+        styles.backgroundColor = 'rgba(255, 123, 0, 0.85)';
+        styles.color = '#c4c4c4';
+      } else {
+        styles.backgroundColor = '';
+        styles.color = '';
+      }
+      return styles;
+    }
+
+    var listeners = {}, touchStarted = false, setDefaultValuesInProgress = false;
+
+    function addListeners(hexaFlip) {
+      var cubes = hexaFlip.querySelectorAll('.hexaflip-cube'), cube;
+      var actions = ['TouchStart', 'MouseDown', /*'TouchMove', 'MouseMove',*/ 'TouchEnd', 'TouchLeave', 'MouseLeave'], action;
+      var mouseLeaveSupport = 'onmouseleave' in window;
+
+      setTimeout(function() {
+        for (var i = 0; i < cubes.length; i++) {
+          cube = cubes[i];
+          for (var j = 0; j < actions.length; j++) {
+            action = actions[j];
+            if (!((action === 'TouchLeave' || action === 'MouseLeave') && !mouseLeaveSupport)) {
+              (function(action) {
+                cube.addEventListener(action.toLowerCase(), function(event) {
+                  return listeners['on' + action](event, this);
+                }, true);
+              }(action));
+            } else {
+              (function(action) {
+                cube.addEventListener('mouseout', function(event) {
+                  return listeners['on' + action](event, this);
+                }, true);
+              }(action));
+            }
+          }
+        }
+      }, 0);
+    }
+
+    listeners.onTouchStart = function(event, cube) {
+      touchStarted = true;
+    };
+
+    listeners.onMouseDown = function(event, cube) {
+      listeners.onTouchStart(event, cube);
+    };
+
+    listeners.onTouchEnd = function(event, cube) {
+      //For each cube separate
+      /*if (cube.dataset.touchStarted && cube.dataset.touchStarted == 'true') {
+       cube.dataset.touchStarted = 'false';
+
+       setTimeout(function() {
+       setDefaultDateTimeValues();
+       }, 1000);
+       }*/
+
+      //For all cubes together
+      if (touchStarted) {
+        if (!setDefaultValuesInProgress) {
+          setDefaultValuesInProgress = true;
+          tryToSetDefaultValues();
+        }
+      }
+    };
+
+    var tryToSetDefaultValues = function() {
+      setTimeout(function() {
+        if (!touchStarted) {
+          setDefaultValues();
+          setDefaultValuesInProgress = false;
+        } else {
+          touchStarted = false;
+          tryToSetDefaultValues();
+        }
+      }, 1000);
+    };
+
+    listeners.onTouchLeave = function(event, cube) {
+      listeners.onTouchEnd(event, cube);
+    };
+
+    listeners.onMouseLeave = function(event, cube) {
+      listeners.onTouchEnd(event, cube);
+    };
+  </script>
+</body>
+</html>
