@@ -5,19 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="keywords" content="Keywords">
   <meta name="author" content="Maciej Kubiak 2019">
-  <link href="upgraded-hexaflip.css" rel="stylesheet" type="text/css">
+  <link href="../upgraded-hexaflip.css" rel="stylesheet" type="text/css">
   <style>
     body {
       margin: 0;
       padding: 0;
       width: 100vw;
       height: 100vh;
-      background-image:
-          radial-gradient(
-              ellipse,
-              #919191,
-              #151515
-          );
+      background-image: radial-gradient(
+          ellipse,
+          #919191,
+          #151515
+      );
     }
 
     .datetime {
@@ -31,9 +30,9 @@
 <body>
   <div class="datetime"></div>
 
-  <script type="text/javascript" src="upgraded-hexaflip.min.js"></script>
+  <script type="text/javascript" src="../upgraded-hexaflip.min.js"></script>
   <script>
-    var hexaTime, birthdayTime = document.querySelector('.datetime'), orgBirthdayTimeHTML = birthdayTime.innerHTML;
+    var hexaTime, dataTime = document.querySelector('.datetime'), orgDataTimeHTML = dataTime.innerHTML;
 
     window.onresize = function() {
       prepareHexaTime();
@@ -44,8 +43,8 @@
     };
 
     function prepareHexaTime() {
-      birthdayTime.innerHTML = orgBirthdayTimeHTML;
-      hexaTime = new HexaFlip(birthdayTime, null, {
+      dataTime.innerHTML = orgDataTimeHTML;
+      hexaTime = new HexaFlip(dataTime, null, {
         size: window.innerWidth * 12 / 100,
         fontSize: window.innerWidth * 12 / 100 / 1.5,
         touchSensitivity: 60 / (window.innerWidth * 12 / 100 / 1.5),
