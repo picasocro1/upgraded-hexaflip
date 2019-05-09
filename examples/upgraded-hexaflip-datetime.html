@@ -49,12 +49,17 @@
         fontSize: window.innerWidth * 12 / 100 / 1.5,
         touchSensitivity: 60 / (window.innerWidth * 12 / 100 / 1.5),
         yearMin: 2015,
-        yearMax: Math.max(2019, new Date().getFullYear())
+        yearMax: Math.max(2019, new Date().getFullYear()),
+        margin: (isMobileDevice() ? 4 : 10)
         /*⚠️ Warning: only vertical flip is allowed when using years*/
       });
 
       addListeners();
       setDefaultDateTimeValues();
+    }
+
+    function isMobileDevice() {
+      return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
     }
 
     /**
