@@ -46,7 +46,7 @@
       dataTime.innerHTML = orgDataTimeHTML;
       hexaTime = new HexaFlip(dataTime, null, {
         size: window.innerWidth * 12 / 100,
-        fontSize: window.innerWidth * 12 / 100 / 1.5,
+        fontSize: (isMobileDevice() ? window.innerWidth * 14 / 100 / 1.5 : window.innerWidth * 12 / 100 / 1.5),
         touchSensitivity: 60 / (window.innerWidth * 12 / 100 / 1.5),
         yearMin: 2015,
         yearMax: Math.max(2019, new Date().getFullYear()),
@@ -81,7 +81,7 @@
 
     function addListeners() {
       var cubes = document.querySelectorAll('.hexaflip-cube'), cube;
-      var actions = ['TouchStart', 'MouseDown', /*'TouchMove', 'MouseMove',*/ 'TouchLeave', 'MouseLeave'], action;
+      var actions = ['TouchStart', 'MouseDown', /*'TouchMove', 'MouseMove',*/ 'TouchEnd', 'TouchLeave', 'MouseLeave'], action;
       var mouseLeaveSupport = 'onmouseleave' in window;
 
       setTimeout(function() {
@@ -134,6 +134,26 @@
         }
       }
     };
+
+    listeners.onTouchLeave = function(event, cube) {
+      //For each cube separate
+      /*if (cube.dataset.touchStarted && cube.dataset.touchStarted == 'true') {
+       cube.dataset.touchStarted = 'false';
+
+       setTimeout(function() {
+       setDefaultDateTimeValues();
+       }, 1000);
+       }*/
+
+      //For all cubes together
+      if (touchStarted) {
+        if (!setDefaultDataTimeInProgress) {
+          setDefaultDataTimeInProgress = true;
+          trySetDefaultDataTimeValues();
+        }
+      }
+    };
+
 
     var trySetDefaultDataTimeValues = function() {
       setTimeout(function() {
